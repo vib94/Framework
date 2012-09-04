@@ -14,14 +14,14 @@ class Yab_Cache_Adapter_Memcache extends Yab_Cache_Adapter_Abstract {
 
 	private $_memcache = null;
 
-	public function __construct($host, $password) {
+	public function __construct($host, $port) {
 
 		if(!class_exists('Memcache'))
 			throw new Yab_Exception('Class Memcache does not exists');
 
 		$this->_memcache = new Memcache();
 
-		if(!@$this->_memcache->connect($host, $password))
+		if(!@$this->_memcache->connect($host, $port))
 			throw new Yab_Exception('Can not connect to Memcache server');
 
 	}
