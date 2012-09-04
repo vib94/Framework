@@ -7,7 +7,7 @@
  * @author     Yann BELLUZZI
  * @copyright  (c) 2010 YBellu
  * @license    http://www.ybellu.com/yab-framework/license.html
- * @link       http://www.ybellu.com/yab-framework 
+ * @link       http://www.ybellu.com/yab-framework
  */
 
 class Yab_Config extends Yab_Object {
