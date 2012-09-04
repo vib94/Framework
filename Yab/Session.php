@@ -28,6 +28,17 @@ class Yab_Session extends Yab_Object {
 	public function __destruct() {
 
 		$_SESSION = $this->_attributes;
+		session_write_close();
+
+	}
+
+	public function destroy() {
+
+		$_SESSION = array();
+
+		session_regenerate_id(true);
+	
+		return $this;
 
 	}
 
