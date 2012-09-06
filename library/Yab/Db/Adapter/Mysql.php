@@ -193,7 +193,7 @@ class Yab_Db_Adapter_Mysql extends Yab_Db_Adapter_Abstract {
 
 	protected function _connect() {
 
-		$this->_connexion = mysql_connect($this->_host, $this->_login, $this->_password);
+		$this->_connexion = @mysql_connect($this->_host, $this->_login, $this->_password);
 
 		if(!$this->isConnected())
 			throw new Yab_Exception('can not connect to mysql server with this host, login, password');
