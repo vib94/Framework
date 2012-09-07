@@ -21,21 +21,7 @@ class Yab_Session extends Yab_Object {
 
 		$_SESSION[self::SESSION_YAB_KEY] = 1;
 
-		$this->_attributes = $_SESSION;		
-
-	}
-	
-	public function sync() {
-		
-		$_SESSION = $this->_attributes;
-		
-		return $this;
-		
-	}
-
-	public function __destruct() {
-
-		return $this->sync();
+		$this->bind($_SESSION);		
 
 	}
 
