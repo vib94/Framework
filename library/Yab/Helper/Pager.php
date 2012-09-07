@@ -50,7 +50,7 @@ class Yab_Helper_Pager {
 
 	}
 
-	public function getStatement($sql_limit = false) {
+	public function getStatement($sql_limit = true) {
 	
 		$statement = clone $this->_statement;
 		
@@ -99,7 +99,7 @@ class Yab_Helper_Pager {
 			$statement->orderBy($order_by);
 
 		if($sql_limit) 
-			return $statement->getAdapter()->prepare($statement->getAdapter()->limit((string) $statement));
+			return $statement->getAdapter()->prepare($statement->getAdapter()->limit((string) $statement, ($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage()));
 		
 		return $statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 
