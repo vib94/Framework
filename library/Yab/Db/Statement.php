@@ -201,11 +201,13 @@ class Yab_Db_Statement implements Iterator, Countable {
 		if($this->isSelect()) {
 			
 			if($this->_result === null) {
-				
+			
 				$this->_nb_rows = $this->_adapter->prepare(preg_replace('#^\s*select\s+(.*)\s+from\s+#is', 'SELECT COUNT(*) FROM ', $this->getPackedSql()))->toRow()->pop();
 				
 			} else {
 			
+				$this->query();
+
 				$this->_nb_rows = $this->_adapter->getSelectedRows($this->_result);
 				
 			}
