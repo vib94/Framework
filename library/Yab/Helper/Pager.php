@@ -32,7 +32,7 @@ class Yab_Helper_Pager {
 	private $_order_by = array();
 	
 	private $_filters = array();
-
+	
 	public function __construct(Yab_Db_Statement $statement, $prefix = null, $request_params = 0, $multi_sort = true) {
 
 		$this->_statement = $statement;
@@ -50,8 +50,8 @@ class Yab_Helper_Pager {
 
 	}
 
-	public function getStatement() {
-
+	public function getStatement($sql_limit = false) {
+	
 		$statement = clone $this->_statement;
 		
 		$statement->free();
@@ -98,10 +98,11 @@ class Yab_Helper_Pager {
 		if(count($order_by)) 
 			$statement->orderBy($order_by);
 
-		$statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
+		if($sql_limit) 
+			return $statement->getAdapter()->prepare($statement->getAdapter()->limit((string) $statement));
+		
+		return $statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 
-		return $statement;
-	
 	}
 
 	public function setFilter($key, $filter = null) {
