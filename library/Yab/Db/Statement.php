@@ -124,6 +124,14 @@ class Yab_Db_Statement implements Iterator, Countable {
 
 	}
 
+	public function sqlLimit($start, $length) {
+
+		$this->_sql = $this->_adapter->limit($this->_sql, max(0, intval($start)), max(1, intval($length)));
+
+		return $this;
+
+	}
+
 	public function limit($start, $length) {
 
 		$this->_start = max(0, intval($start));
