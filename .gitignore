@@ -28,6 +28,12 @@ local.properties
 # PDT-specific
 .buildpath
 
+application/*
+public/*
+script/*
+log/*
+config/*
+
 
 #################
 ## Visual Studio

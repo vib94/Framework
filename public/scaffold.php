@@ -12,7 +12,7 @@ try {
 
 	$db = $loader->getRegistry()->get('db');
 	
-	$scaffolder = new Yab_Scaffolder($db, $root.'application');
+	$scaffolder = new Yab_Scaffolder($db, $root.'scaffold');
 	
 	$scaffolder->scaffold();
 		
