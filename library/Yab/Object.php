@@ -82,6 +82,14 @@ class Yab_Object implements ArrayAccess, Iterator, Countable {
 		return $this->clear()->populate($attributes, $prefix);
 
 	}
+	
+	public function bind(array &$attributes) {
+
+		$this->_attributes = &$attributes;
+	
+		return $this;
+
+	}
 
 	public function populate(array $attributes, $prefix = '') {
 
