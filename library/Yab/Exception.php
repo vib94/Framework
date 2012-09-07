@@ -49,7 +49,7 @@ class Yab_Exception extends Exception {
 		$render .= '</style>'.PHP_EOL;
 		$render .= '</head>'.PHP_EOL;
 		$render .= '<body>'.PHP_EOL;
-		$render .= '<pre><h1>A <span class="exceptionClass">'.get_class($this).'</span> has been caught !</h1><h2>&gt; '.$this->getMessage().'</h2><strong>Traces</strong> : <div id="trace">';
+		$render .= '<pre><h1>A <span class="exceptionClass">'.get_class($this).'</span> has been caught !</h1><h2>&gt; '.htmlspecialchars($this->getMessage()).'</h2><strong>Traces</strong> : <div id="trace">';
 
 		$render .= $this->trace($this->getFile(), $this->getLine(), '', '', array(), true);
 

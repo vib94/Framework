@@ -116,7 +116,7 @@ class Yab_Controller_Router {
 		$equal = strrpos($route, '=');
 		
 		if(!is_numeric($equal))
-			throw new Yab_Exception($route.' is not a valid route ( no equal )');
+			throw new Yab_Exception('"'.$route.'" is not a valid route ( no equal )');
 
 		$external = trim(substr($route, 0, $equal));	
 		$internal = trim(substr($route, $equal + 1));	
@@ -128,17 +128,17 @@ class Yab_Controller_Router {
 			$first_comma = strpos($internal, '.');
 			
 			if(!is_numeric($first_comma))
-				throw new Yab_Exception('"'$route.'" is not a valid route ( no dot )');
+				throw new Yab_Exception('"'.$route.'" is not a valid route ( no dot )');
 
 			$opened_parenthesis = strpos($internal, '(');
 			
 			if(!is_numeric($opened_parenthesis))
-				throw new Yab_Exception('"'$route.'" is not a valid route ( no opened_parenthesis )');
+				throw new Yab_Exception('"'.$route.'" is not a valid route ( no opened_parenthesis )');
 
 			$closed_parenthesis = strpos($internal, ')');
 			
 			if(!is_numeric($closed_parenthesis))
-				throw new Yab_Exception('"'$route.'" is not a valid route ( no closed_parenthesis )');	
+				throw new Yab_Exception('"'.$route.'" is not a valid route ( no closed_parenthesis )');	
 
 			$internal_controller = trim(substr($internal, 0, $first_comma));		
 			$internal_action = trim(substr($internal, $first_comma + 1, $opened_parenthesis - $first_comma - 1));		
