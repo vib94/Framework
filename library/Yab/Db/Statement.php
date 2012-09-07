@@ -363,7 +363,7 @@ class Yab_Db_Statement implements Iterator, Countable {
 		$packs = $this->_packs;
 
 		while(preg_match('#'.preg_quote(self::LEFT_PACK_BOUNDARY, '#').'([0-9]+)'.preg_quote(self::RIGHT_PACK_BOUNDARY, '#').'#is', $this->_sql, $match)) 
-			$this->_sql = str_replace(self::LEFT_PACK_BOUNDARY.$i.self::RIGHT_PACK_BOUNDARY, $this->_packs[$match[1]], $this->_sql);
+			$this->_sql = str_replace(self::LEFT_PACK_BOUNDARY.$match[1].self::RIGHT_PACK_BOUNDARY, $this->_packs[$match[1]], $this->_sql);
 
 		$this->_packs = array();
 		

@@ -113,6 +113,7 @@ class Yab_Controller_Router {
 	
 	final private function _route(Yab_Controller_Request $request, $route) {
 
+	
 		$equal = strrpos($route, '=');
 		
 		if(!is_numeric($equal))
@@ -122,7 +123,7 @@ class Yab_Controller_Router {
 		$internal = trim(substr($route, $equal + 1));	
 		
 		$external_regexp = '#^'.str_replace('\*', '([a-zA-Z0-9_-]*)',  preg_quote($external, '#')).'#';
-		
+
 		if($internal) {
 		
 			$first_comma = strpos($internal, '.');
@@ -148,7 +149,7 @@ class Yab_Controller_Router {
 				throw new Yab_Exception('Wrong paramaeters count in this route');
 
 			$internal_params = $internal_params ? array_map('trim', explode(',', $internal_params)) : array();
-			
+
 			if($request->getUri()) {
 
 				if(!preg_match($external_regexp, $request->getUri(), $matches))
@@ -162,7 +163,7 @@ class Yab_Controller_Router {
 				$request->setParams($internal_params);
 			
 				$this->_checkRequest($request);
-
+	
 				return true;
 
 			}
