@@ -81,6 +81,41 @@ class Yab_Controller_Router {
 
 	final public function route(Yab_Controller_Request $request) {
 
+		if(!$request->isRouted()) {
+
+			if($request->getUri()) {
+
+				$parts = trim($request->getUri(false), '/');
+				$parts = $parts ? explode('/', $parts) : array();
+				
+				$parts = array_map('urldecode', $parts);
+
+				try {
+			
+					$request->setController(count($parts) ? array_shift($parts) : $this->_default_controller);
+					$request->setAction(count($parts) ? array_shift($parts) : $this->_default_action);
+					$request->setParams($parts);
+					
+					$class = $request->getControllerClass();
+					$method = $request->getActionMethod();
+
+					if(!class_exists($class) || !method_exists($class, $method))
+						throw new Yab_Exception('no route');
+						
+				} catch(Yab_Exception $e) {
+				
+					# continue to file router
+				
+				}
+
+			} else {
+
+				$request->setUri($request->getBaseUrl().'/'.$request->getController().'/'.$request->getAction().'/'.implode('/', $request->getParams()));
+
+			}
+
+		}
+
 		if(!$request->isRouted() && $this->_file) {
 
 			$fh = fopen($this->_file, 'rt', true);
@@ -105,41 +140,9 @@ class Yab_Controller_Router {
 
 		}
 
-		if(!$request->isRouted()) {
-
-			if($request->getUri()) {
-
-				$parts = trim($request->getUri(false), '/');
-				$parts = $parts ? explode('/', $parts) : array();
+		if(!$request->isRouted())
+			$request->setController($this->_error_controller)->setAction($this->_default_action)->setParams(array());
 				
-				$parts = array_map('urldecode', $parts);
-
-				try {
-			
-					$request->setController(count($parts) ? array_shift($parts) : $this->_default_controller);
-					$request->setAction(count($parts) ? array_shift($parts) : $this->_default_action);
-					$request->setParams($parts);
-					
-					$class = $request->getControllerClass();
-					$method = $request->getActionMethod();
-
-					if(!class_exists($class) || !method_exists($class, $method))
-						throw new Yab_Exception('no route');
-						
-				} catch(Yab_Exception $e) {
-				
-					$request->setController($this->_error_controller)->setAction($this->_default_action)->setParams(array());
-				
-				}
-
-			} else {
-
-				$request->setUri($request->getBaseUrl().'/'.$request->getController().'/'.$request->getAction().'/'.implode('/', $request->getParams()));
-
-			}
-
-		}
-
 		return $this;
 
 	}
