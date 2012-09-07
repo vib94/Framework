@@ -19,6 +19,7 @@ class Yab_Db_Statement implements Iterator, Countable {
 
 	private $_sql = null;
 	private $_result = null;
+	private $_nb_rows = null;
 
 	private $_row = null;
 
@@ -177,12 +178,39 @@ class Yab_Db_Statement implements Iterator, Countable {
 		return !$this->hasNext();
 
 	}
+	
+	public function isSelect() {
+		
+		return preg_match('#^\s*select\s+#is', $this->getPackedSql());
+		
+	}
 
 	public function count() {
 
-		$this->query();
+		if(is_numeric($this->_nb_rows))
+			return $this->_nb_rows;
+	
+		if($this->isSelect()) {
+			
+			if($this->_result === null) {
+				
+				$this->_nb_rows = $this->_adapter->prepare(preg_replace('#^\s*select\s+(.*)\s+from\s+#is', 'SELECT COUNT(*) FROM ', $this->getPackedSql()))->toRow()->pop();
+				
+			} else {
+			
+				$this->_nb_rows = $this->_adapter->getSelectedRows($this->_result);
+				
+			}
 
-		return $this->_result === null ? $this->_adapter->getSelectedRows($this->_result) : $this->_adapter->getAffectedRows();
+		} else {
+			
+			$this->query();
+			
+			$this->_nb_rows = $this->_adapter->getAffectedRows();
+		
+		}
+
+		return $this->_nb_rows;
 
 	}
 
