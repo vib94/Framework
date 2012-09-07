@@ -24,10 +24,18 @@ class Yab_Session extends Yab_Object {
 		$this->_attributes = $_SESSION;		
 
 	}
+	
+	public function sync() {
+		
+		$_SESSION = $this->_attributes;
+		
+		return $this;
+		
+	}
 
 	public function __destruct() {
 
-		$_SESSION = $this->_attributes;
+		return $this->sync();
 
 	}
 
