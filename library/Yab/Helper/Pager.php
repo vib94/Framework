@@ -99,7 +99,7 @@ class Yab_Helper_Pager {
 			$statement->orderBy($order_by);
 
 		if($sql_limit) 
-			return $statement->getAdapter()->prepare($statement->getAdapter()->limit((string) $statement, ($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage()));
+			return $statement->sqlLimit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 		
 		return $statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 
