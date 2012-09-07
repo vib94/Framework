@@ -153,6 +153,7 @@ class Yab_Db_Statement implements Iterator, Countable {
 	public function free() {
 
 		$this->_result = null;
+		$this->_nb_rows = null;
 
 		return $this;
 
@@ -187,12 +188,6 @@ class Yab_Db_Statement implements Iterator, Countable {
 
 	}
 	
-	public function isSelect() {
-		
-		return preg_match('#^\s*select\s+#is', $this->getPackedSql());
-		
-	}
-
 	public function count() {
 
 		if(is_numeric($this->_nb_rows))
@@ -201,8 +196,12 @@ class Yab_Db_Statement implements Iterator, Countable {
 		if($this->isSelect()) {
 			
 			if($this->_result === null) {
+
+				$statement = new self($this->_adapter, $this->_sql);
 			
-				$this->_nb_rows = $this->_adapter->prepare(preg_replace('#^\s*select\s+(.*)\s+from\s+#is', 'SELECT COUNT(*) FROM ', $this->getPackedSql()))->toRow()->pop();
+				$this->_nb_rows = $statement->select('COUNT(*)')->toRow()->pop();
+				
+				unset($statement);
 				
 			} else {
 			
@@ -394,6 +393,24 @@ class Yab_Db_Statement implements Iterator, Countable {
 		
 		return $this;
 	
+	
+	}
+	
+	public function isSelect() {
+	
+		return preg_match('#^\s*select\s+.*\s+from\s+#is', $this->getPackedSql());
+	
+	}
+	
+	public function select($select) {
+	
+		$this->pack();
+		
+		$this->_sql = preg_replace('#^\s*select\s+.*\s+from\s+#is', 'SELECT '.$select.' FROM ', $this->_sql);
+		
+		$this->unpack();
+		
+		return $this;
 	
 	}
 	
