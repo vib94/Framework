@@ -33,6 +33,8 @@ class Yab_Helper_Pager {
 	
 	private $_filters = array();
 	
+	private $_total = null;
+	
 	public function __construct(Yab_Db_Statement $statement, $prefix = null, $request_params = 0, $multi_sort = true) {
 
 		$this->_statement = $statement;
@@ -100,6 +102,8 @@ class Yab_Helper_Pager {
 
 		if($sql_limit)
 			return $statement->sqlLimit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
+
+		$this->_total = count($statement->query());
 	
 		return $statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 
@@ -239,7 +243,7 @@ class Yab_Helper_Pager {
 
 	public function getTotal() {
 
-		return count($this->_statement);
+		return is_numeric($this->_total) ? $this->_total : count($this->_statement);
 
 	}
 
