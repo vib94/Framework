@@ -95,10 +95,10 @@ class Yab_Helper_Pager {
 		
 		$order_by = $this->getSqlOrderBy();
 		
-		if(count($order_by)) 
+		if(count($order_by))
 			$statement->orderBy($order_by);
 
-		if($sql_limit) 
+		if($sql_limit)
 			return $statement->sqlLimit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 		
 		return $statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
