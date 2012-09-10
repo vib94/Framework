@@ -46,10 +46,21 @@ class Yab_Helper_Pager {
 		$this->_request = Yab_Loader::getInstance()->getRequest();
 
 		if($this->_request->getParam($this->_request_params) == self::CLEAR_URL_TAG)
-			Yab_Loader::getInstance()->getSession()->clean($this->_prefix);
+			$this->getSession()->clear();
 		
 		$this->_order_by = $this->_statement->getOrderBy();
+		
+	}
+	
+	private function getSession() {
 
+		$session = Yab_Loader::getInstance()->getSession();
+
+		if(!$session->has('pager_'.$this->_prefix))
+			$session->set('pager_'.$this->_prefix, array());
+
+		return $session->cast('pager_'.$this->_prefix);
+	
 	}
 
 	public function getStatement($sql_limit = true) {
@@ -127,8 +138,8 @@ class Yab_Helper_Pager {
 
 		$value = null;
 
-		if($this->_prefix && Yab_Loader::getInstance()->getSession()->has($this->_prefix.$key))
-			$value = Yab_Loader::getInstance()->getSession()->get($this->_prefix.$key);
+		if($this->getSession()->has('filter_'.$key))
+			$value = $this->getSession()->get('filter_'.$key);
 
 		if($this->_request->getGet()->has($key))
 			$value = $this->_request->getGet()->get($key);
@@ -136,8 +147,8 @@ class Yab_Helper_Pager {
 		if($this->_request->getPost()->has($key))
 			$value = $this->_request->getPost()->get($key);
 
-		if($this->_prefix && $value !== null)
-			Yab_Loader::getInstance()->getSession()->set($this->_prefix.$key, $value);
+		if($value !== null)
+			$this->getSession()->set('filter_'.$key, $value);
 
 		if($filters === null)
 			return $value;
@@ -441,14 +452,14 @@ class Yab_Helper_Pager {
 		
 		$param = null;
 
-		if((count($this->_request->getParams()) - $this->_request_params < 2) && $this->_prefix && Yab_Loader::getInstance()->getSession()->has($this->_prefix.$key))
-			$param = Yab_Loader::getInstance()->getSession()->get($this->_prefix.$key);
+		if((count($this->_request->getParams()) - $this->_request_params < 2) && $this->getSession()->has('param_'.$key))
+			$param = $this->getSession()->get('param_'.$key);
 
 		if($this->_request->getParam($key))
 			$param = $this->_request->getParam($key);
 
-		if($this->_prefix && $param !== null)
-			Yab_Loader::getInstance()->getSession()->set($this->_prefix.$key, $param);
+		if($param !== null)
+			$this->getSession()->set('param_'.$key, $param);
 
 		return $param;
 
