@@ -326,27 +326,22 @@ class Yab_Object implements ArrayAccess, Iterator, Countable {
 
 	}
 
-	public function clean($pattern = '') {
-
-		if(strlen($pattern) < 3 || substr($pattern, 0, 1) !== substr($pattern, -1, 1))
-			$pattern = '#'.preg_quote($pattern, '#').'#';
-
-		foreach($this->toArray() as $key => $value) {
-		
-			if(preg_match($pattern, $key))
-				$this->rem($key);
-		
-		}
-		
-		return $this;
-		
-	}
-
-	public function cast($key) {
+	public function cast($key, $bind = false) {
 
 		$value = $this->get($key);
 
-		return is_object($value) ? $value : new self($value);
+		if(is_object($value))
+			return $value;
+			
+		if(is_array($value)) {
+		
+			$cast = new self();
+			
+			return $cast->bind($this->_attributes[$key]);
+		
+		}
+		
+		return new self($value);
 
 	}
 
