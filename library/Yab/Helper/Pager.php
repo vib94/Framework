@@ -18,6 +18,8 @@ class Yab_Helper_Pager {
 	
 	private $_prefix = null;
 
+	private $_session = null;
+	
 	private $_request = null;
 	private $_request_params = 0;
 	
@@ -45,22 +47,26 @@ class Yab_Helper_Pager {
 		
 		$this->_request = Yab_Loader::getInstance()->getRequest();
 
+		if($this->_prefix) {
+		
+			$session = Yab_Loader::getInstance()->getSession();
+
+			if(!$session->has('pager_'.$this->_prefix))
+				$session->set('pager_'.$this->_prefix, array());
+
+			$this->_session = $session->cast('pager_'.$this->_prefix);
+		
+		} else {
+		
+			$this->_session = new Yab_Object();
+		
+		}
+		
 		if($this->_request->getParam($this->_request_params) == self::CLEAR_URL_TAG)
-			$this->getSession()->clear();
+			$this->_session->clear();
 		
 		$this->_order_by = $this->_statement->getOrderBy();
 		
-	}
-	
-	private function getSession() {
-
-		$session = Yab_Loader::getInstance()->getSession();
-
-		if(!$session->has('pager_'.$this->_prefix))
-			$session->set('pager_'.$this->_prefix, array());
-
-		return $session->cast('pager_'.$this->_prefix);
-	
 	}
 
 	public function getStatement($sql_limit = true) {
@@ -138,8 +144,8 @@ class Yab_Helper_Pager {
 
 		$value = null;
 
-		if($this->getSession()->has('filter_'.$key))
-			$value = $this->getSession()->get('filter_'.$key);
+		if($this->_session->has('filter_'.$key))
+			$value = $this->_session->get('filter_'.$key);
 
 		if($this->_request->getGet()->has($key))
 			$value = $this->_request->getGet()->get($key);
@@ -148,7 +154,7 @@ class Yab_Helper_Pager {
 			$value = $this->_request->getPost()->get($key);
 
 		if($value !== null)
-			$this->getSession()->set('filter_'.$key, $value);
+			$this->_session->set('filter_'.$key, $value);
 
 		if($filters === null)
 			return $value;
@@ -455,14 +461,14 @@ class Yab_Helper_Pager {
 		
 		$param = null;
 
-		if((count($this->_request->getParams()) - $this->_request_params < 2) && $this->getSession()->has('param_'.$key))
-			$param = $this->getSession()->get('param_'.$key);
+		if((count($this->_request->getParams()) - $this->_request_params < 2) && $this->_session->has('param_'.$key))
+			$param = $this->_session->get('param_'.$key);
 
 		if($this->_request->getParam($key))
 			$param = $this->_request->getParam($key);
 
 		if($param !== null)
-			$this->getSession()->set('param_'.$key, $param);
+			$this->_session->set('param_'.$key, $param);
 
 		return $param;
 
