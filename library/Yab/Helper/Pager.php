@@ -157,7 +157,7 @@ class Yab_Helper_Pager {
 
 	}
 
-	public function getPagination($wave = 5) {
+	public function getPagination($wave = 5, $total = true, $reset = true) {
 
 		$wave = (int) $wave;
 
@@ -182,9 +182,12 @@ class Yab_Helper_Pager {
 			
 		if($this->getCurrentPage() + $wave < $this->getLastPage())
 			$html .= '<li><a href="'.$this->getRequest($this->getLastPage()).'">'.$this->getLastPage().'</a></li>';
+		
+		if($total)
+			$html .= '<li class="total"><span>Total :</span> <a href="'.$this->getRequest(1, $this->getTotal()).'">'.$this->getTotal().'</a></li>';
 			
-		$html .= '<li class="total"><span>Total :</span> <a href="'.$this->getRequest(1, $this->getTotal()).'">'.$this->getTotal().'</a></li>';
-		$html .= '<li class="reset"><a href="'.$this->getRequest().'">Reset</a></li>';
+		if($reset)
+			$html .= '<li class="reset"><a href="'.$this->getRequest().'">Reset</a></li>';
 
 		$html .= '</ul>';
 		
