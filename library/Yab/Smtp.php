@@ -167,7 +167,7 @@ class Yab_Smtp extends Yab_Socket {
 	}
 
 	protected function _onConnect() {
-	
+
 		$this->_command('EHLO '.gethostbyaddr($this->getAddress()));
 
 		if($this->_login) 
@@ -192,7 +192,7 @@ class Yab_Smtp extends Yab_Socket {
 		$this->_command('MAIL FROM:'.$from);
 		$this->_command('RCPT TO:'.$to);
 		$this->_command('DATA');
-		
+
 		$data = $this->signDkim($data);
 
 		$data = str_replace("\n.", "\n..", $data);
@@ -200,9 +200,10 @@ class Yab_Smtp extends Yab_Socket {
 
 		if(substr($data, 0, 1) == '.')
 			$data = '.'.$data;
+		
+		$data = $data.self::CRLF.'.';
 
 		$this->_command($data);
-		$this->_command('.');
 
 		return $this;
 
