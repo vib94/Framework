@@ -204,8 +204,6 @@ class Yab_Db_Statement implements Iterator, Countable {
 				unset($statement);
 				
 			} else {
-			
-				$this->query();
 
 				$this->_nb_rows = $this->_adapter->getSelectedRows($this->_result);
 				
@@ -366,7 +364,6 @@ class Yab_Db_Statement implements Iterator, Countable {
 		$this->_packs = array();
 		
 		return $this;
-	
 	
 	}
 	
