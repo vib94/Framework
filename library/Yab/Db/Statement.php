@@ -197,9 +197,9 @@ class Yab_Db_Statement implements Iterator, Countable {
 			
 			if($this->_result === null) {
 
-				$statement = new self($this->_adapter, $this->_sql);
+				$statement = new self($this->_adapter, 'SELECT COUNT(*) FROM ('.$this->_sql.') as T');
 			
-				$this->_nb_rows = $statement->select('COUNT(*)')->toRow()->pop();
+				$this->_nb_rows = $statement->toRow()->pop();
 				
 				unset($statement);
 				
