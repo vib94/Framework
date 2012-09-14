@@ -50,6 +50,14 @@ abstract class Yab_Db_Adapter_Abstract {
 	abstract protected function _affectedRows();
 	abstract protected function _quote($text);
 
+	final public function setDefault() {
+
+		self::setDefaultAdapter($this);
+
+		return $this;
+
+	}
+
 	final public function quote($text) {
 
 		if(!$this->isConnected())
