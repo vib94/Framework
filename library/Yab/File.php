@@ -250,7 +250,21 @@ class Yab_File {
 		return $this;
 
 	}
-	
+
+	final public function rem($path = null) {
+
+		if($path !== null)
+			$this->setPath($path);
+			
+		if(!Yab_Loader::getInstance()->isFile($this->_path) || !is_writable($this->_path))
+			throw new Yab_Exception('can not delete the file "'.$this->_path.'"');
+
+		unlink($this->_path);
+			
+		return $this;
+
+	}
+
 	final public function createDirectory() {
 	
 		if(Yab_Loader::getInstance()->isFile($this->_path))
