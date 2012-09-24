@@ -251,7 +251,7 @@ class Yab_File {
 
 	}
 
-	final public function rem($path = null) {
+	final public function delete($path = null) {
 
 		if($path !== null)
 			$this->setPath($path);
