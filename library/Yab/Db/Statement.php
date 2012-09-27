@@ -454,7 +454,7 @@ class Yab_Db_Statement implements Iterator, Countable {
 			if(!preg_match($search, $this->_sql))
 				continue;
 
-			$this->_sql = preg_replace($search, $replace, $this->_sql);
+			$this->_sql = preg_replace($search, $replace, $this->_sql, 1);
 
 			break;
 
