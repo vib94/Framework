@@ -406,30 +406,49 @@ class Yab_Db_Statement implements Iterator, Countable {
 		return $select;
 	
 	}
-
-	public function from() {
 	
+	public function getTables() {
 	
-	}
-	
-	public function getFrom() {
-	
-		$from = array();
+		$tables = array();
 
 		if(!preg_match('#\s+FROM\s+([a-zA-Z0-9\-_.,\s]+)\s*(ORDER\s+BY|LIMIT|GROUP|WHERE|INNER|LEFT|RIGHT|JOIN|$)#is', $this->getPackedSql(), $match))
-			return $from;
+			$tables += $this->_extractTables(preg_split('#\s*,\s*#is', $match[1]));
+
+		preg_match_all('#\s+JOIN\s+(.+)\s+ON\s+(.+)(ORDER\s+BY|LIMIT|GROUP|WHERE|INNER|LEFT|RIGHT|JOIN|$)#Uis', $this->getPackedSql(), $match);
+
+		$tables += $this->_extractTables($match[1]);
+		
+		return $tables;
 	
-		$parts = preg_split('#\s*,\s*#is', $match[1]);
+	}	
+	
+	private function _extractTables($aliased_tables) {
+	
+		if(!is_array($aliased_tables))
+			$aliased_tables = array($aliased_tables);
+	
+		$tables = array();
+	
+		foreach($aliased_tables as $table) {
+
+			$table = trim($table);
 		
-		foreach($parts as $part) {
+			$table = preg_split('#\s+#s', $table);
 		
-			$part = trim($part);
+			$table_name = array_shift($table);
+			$table_alias = array_shift($table);
+			
+			if(!$table_alias)
+				$table_alias = $table_name;
 		
-			$from[$part] = $part;
+			$table_name = $this->_adapter->unquoteIdentifier($table_name);
+			$table_alias = $this->_adapter->unquoteIdentifier($table_alias);
+				
+			$tables[$table_alias] = $table_name;
 		
 		}
-
-		return $from;
+		
+		return $tables;
 	
 	}	
 
