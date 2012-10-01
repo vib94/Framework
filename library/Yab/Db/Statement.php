@@ -411,7 +411,7 @@ class Yab_Db_Statement implements Iterator, Countable {
 	
 		$tables = array();
 
-		if(!preg_match('#\s+FROM\s+([a-zA-Z0-9\-_.,\s]+)\s*(ORDER\s+BY|LIMIT|GROUP|WHERE|INNER|LEFT|RIGHT|JOIN|$)#is', $this->getPackedSql(), $match))
+		if(preg_match('#\s+FROM\s+([a-zA-Z0-9\-_.,\s]+)\s*(ORDER\s+BY|LIMIT|GROUP|WHERE|INNER|LEFT|RIGHT|JOIN|$)#is', $this->getPackedSql(), $match))
 			$tables += $this->_extractTables(preg_split('#\s*,\s*#is', $match[1]));
 
 		preg_match_all('#\s+JOIN\s+(.+)\s+ON\s+(.+)(ORDER\s+BY|LIMIT|GROUP|WHERE|INNER|LEFT|RIGHT|JOIN|$)#Uis', $this->getPackedSql(), $match);
@@ -444,7 +444,7 @@ class Yab_Db_Statement implements Iterator, Countable {
 			$table_name = $this->_adapter->unquoteIdentifier($table_name);
 			$table_alias = $this->_adapter->unquoteIdentifier($table_alias);
 				
-			$tables[$table_alias] = $table_name;
+			$tables[$table_alias] =  $this->_adapter->getTable($table_name);
 		
 		}
 		
@@ -546,12 +546,6 @@ class Yab_Db_Statement implements Iterator, Countable {
 		}
 
 		return $order_by;
-	
-	}
-	
-	public function groupBy($group_by) {
-	
-		
 	
 	}
 	
