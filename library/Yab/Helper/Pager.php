@@ -69,13 +69,15 @@ class Yab_Helper_Pager {
 	
 	public function getFilteredStatement() {
 	
+		$adapter = $this->_statement->getAdapter();
+	
 		$statement = clone $this->_statement;
 		
 		$statement->free();
 		
 		$tables = $statement->getTables();
 
-		foreach($this->_request->getGet() as $key => $value) {
+		foreach($this->_request->getRequest() as $key => $value) {
 		
 			if(!preg_match('#^filter_([^~]+)~([^:]+)$#i', $key, $match))
 				continue;
@@ -106,11 +108,13 @@ class Yab_Helper_Pager {
 			
 			if(is_array($value)) {
 			
-				$statement->where($statement->getAdapter()->quoteIdentifier($table_alias).'.'.$statement->getAdapter()->quoteIdentifier($table_column).' IN ('.implode(', ', array_map(array($statement->getAdapter(), 'quote'), $value)).')');
+				if(count($value))
+					$statement->where($adapter->quoteIdentifier($table_alias).'.'.$adapter->quoteIdentifier($table_column).' IN ('.implode(', ', array_map(array($adapter, 'quote'), $value)).')');
 
 			} else {
 
-				$statement->where($statement->getAdapter()->quoteIdentifier($table_alias).'.'.$statement->getAdapter()->quoteIdentifier($table_column).' LIKE '.$statement->getAdapter()->quote('%'.$value.'%'));
+				if($value)
+					$statement->where($adapter->quoteIdentifier($table_alias).'.'.$adapter->quoteIdentifier($table_column).' LIKE '.$adapter->quote('%'.$value.'%'));
 
 			}
 		
@@ -149,6 +153,12 @@ class Yab_Helper_Pager {
 		)->orderBy(
 			array($column_value => 'asc')
 		)->setKey($column_key)->setValue($column_value);
+
+	}	
+	
+	public function getFilterName($table_alias, $column_key) {
+	
+		return 'filter_'.$table_alias.'~'.$column_key;
 
 	}
 
