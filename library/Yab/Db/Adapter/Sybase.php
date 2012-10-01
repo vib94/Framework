@@ -84,6 +84,9 @@ class Yab_Db_Adapter_Sybase extends Yab_Db_Adapter_Abstract {
 
 	public function free($rowset) {
 
+		if(!is_resource($rowset))
+			return false;
+			
 		return sybase_free_result($rowset);
 
 	}
