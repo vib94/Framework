@@ -435,16 +435,16 @@ class Yab_Db_Statement implements Iterator, Countable {
 		
 			$table = preg_split('#\s+#s', $table);
 		
-			$table_name = array_shift($table);
-			$table_alias = array_shift($table);
+			$name = array_shift($table);
+			$alias = array_shift($table);
 			
-			if(!$table_alias)
-				$table_alias = $table_name;
+			if(!$alias)
+				$alias = $name;
 		
-			$table_name = $this->_adapter->unquoteIdentifier($table_name);
-			$table_alias = $this->_adapter->unquoteIdentifier($table_alias);
+			$name = $this->_adapter->unquoteIdentifier($name);
+			$alias = $this->_adapter->unquoteIdentifier($alias);
 				
-			$tables[$table_alias] =  $this->_adapter->getTable($table_name);
+			$tables[$alias] =  $this->_adapter->getTable($name);
 		
 		}
 		
