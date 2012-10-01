@@ -33,8 +33,6 @@ class Yab_Helper_Pager {
 
 	private $_order_by = array();
 	
-	private $_filters = array();
-	
 	private $_total = null;
 	
 	public function __construct(Yab_Db_Statement $statement, $prefix = null, $request_params = 0, $multi_sort = true) {
@@ -68,49 +66,63 @@ class Yab_Helper_Pager {
 		$this->_order_by = $this->_statement->getOrderBy();
 		
 	}
-
-	public function getStatement($sql_limit = true) {
+	
+	public function getFilteredStatement() {
 	
 		$statement = clone $this->_statement;
 		
 		$statement->free();
-	
-		foreach($this->_filters as $key => $filter) {
 		
-			$value = $this->getFilter($key);
+		$tables = $statement->getTables();
 
-			if($value === '' || $value === null)
+		foreach($this->_request->getGet() as $key => $value) {
+		
+			if(!preg_match('#^filter_([^~]+)~([^:]+)$#i', $key, $match))
+				continue;
+				
+			$this->_session->set($match[0], $value);
+		
+		}
+
+		foreach($this->_session as $key => $value) {
+		
+			if(!preg_match('#^filter_([^~]+)~([^~]+)$#i', $key, $match))
 				continue;
 			
-			if($filter === null) {
+			$table_alias = $match[1];
+			$table_column = $match[2];
 			
-				$filter = $key.' :'.$key;
-	
-				if(is_array($value)) {
-				
-					$statement->where($filter)->bind(':'.$key, ' IN ('.implode(', ', array_map(array($statement->getAdapter(), 'quote'), $value)).')', false);
+			if(!array_key_exists($table_alias, $tables))
+				continue;
+			
+			$table_name = $tables[$table_alias];
+			
+			$columns = $statement->getAdapter()->getColumns($table_name);
+			
+			if(!array_key_exists($table_column, $columns))
+				continue;
+			
+			$column = $columns[$table_column];
+			
+			if(is_array($value)) {
+			
+				$statement->where($statement->getAdapter()->quoteIdentifier($table_alias).'.'.$statement->getAdapter()->quoteIdentifier($table_column).' IN ('.implode(', ', array_map(array($statement->getAdapter(), 'quote'), $value)).')');
 
-				} else {
-
-					$statement->where($filter)->bind(':'.$key, ' LIKE '.$statement->getAdapter()->quote('%'.$value.'%'), false);
-
-				}
-				
 			} else {
-	
-				if(is_array($value)) {
-				
-					$statement->where($filter)->bind('?', ' IN ('.implode(', ', array_map(array($statement->getAdapter(), 'quote'), $value)).')', false);
 
-				} else {
+				$statement->where($statement->getAdapter()->quoteIdentifier($table_alias).'.'.$statement->getAdapter()->quoteIdentifier($table_column).' LIKE '.$statement->getAdapter()->quote('%'.$value.'%'));
 
-					$statement->where($filter)->bind('?', ' LIKE '.$statement->getAdapter()->quote('%'.$value.'%'), false);
-
-				}
-			
 			}
-
+		
 		}
+		
+		return $statement;
+	
+	}
+
+	public function getStatement($sql_limit = true) {
+	
+		$statement = $this->getFilteredStatement();
 		
 		$order_by = $this->getSqlOrderBy();
 		
@@ -125,41 +137,18 @@ class Yab_Helper_Pager {
 		return $statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 
 	}
-
-	public function setFilter($key, $filter = null) {
-
-		$this->_filters[$key] = $filter;
-
-		return $this;
-
-	}
-
-	public function getFilter($key = null, $filters = null) {
-
-		if($key === null)
-			return $this->_filters;
-
-		if(!array_key_exists($key, $this->_filters))
-			throw new Yab_Exception($key.' is not a setted filter key');
-
-		$value = null;
-
-		if($this->_session->has('filter_'.$key))
-			$value = $this->_session->get('filter_'.$key);
-
-		if($this->_request->getGet()->has($key))
-			$value = $this->_request->getGet()->get($key);
-
-		if($this->_request->getPost()->has($key))
-			$value = $this->_request->getPost()->get($key);
-
-		if($value !== null)
-			$this->_session->set('filter_'.$key, $value);
-
-		if($filters === null)
-			return $value;
-
-		return Yab_Loader::getInstance('Yab_Filter_Factory')->feed($this->_filters)->set('filters', $filters)->filter($value);	
+	
+	public function getFilterStatement($table_alias, $column_key, $column_value) {
+	
+		$adapter = $this->_statement->getAdapter();
+	
+		return $this->getFilteredStatement()->select(
+			'DISTINCT '.
+			$adapter->quoteIdentifier($table_alias).'.'.$adapter->quoteIdentifier($column_key).', '.
+			$adapter->quoteIdentifier($table_alias).'.'.$adapter->quoteIdentifier($column_value)
+		)->orderBy(
+			array($column_value => 'asc')
+		)->setKey($column_key)->setValue($column_value);
 
 	}
 
