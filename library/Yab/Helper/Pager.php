@@ -95,9 +95,9 @@ class Yab_Helper_Pager {
 			if(!array_key_exists($table_alias, $tables))
 				continue;
 			
-			$table_name = $tables[$table_alias];
+			$table = $tables[$table_alias];
 			
-			$columns = $statement->getAdapter()->getColumns($table_name);
+			$columns = $table->getColumns();
 			
 			if(!array_key_exists($table_column, $columns))
 				continue;
@@ -345,7 +345,7 @@ class Yab_Helper_Pager {
 
 		while(($column = $this->_getRequestParam(2 + $i)) && ($order = $this->_getRequestParam(3 + $i))) {
 
-			if($column && $this->_sanitizeColumn($column))
+			if($column && $this->_validSortColumn($column))
 				$order_by[$column] = strtolower($order) == 'desc' ? 'desc' : 'asc';
 
 			if(!$this->_multi_sort)
@@ -355,7 +355,7 @@ class Yab_Helper_Pager {
 
 		}
 
-		if($additionnal_column && $this->_sanitizeColumn($additionnal_column)) {
+		if($additionnal_column && $this->_validSortColumn($additionnal_column)) {
 
 			if(!$this->_multi_sort)
 				$order_by = array_key_exists($additionnal_column, $order_by) ? array($additionnal_column => $order_by[$additionnal_column]) : array();
@@ -429,7 +429,7 @@ class Yab_Helper_Pager {
 		
 		foreach($order_by as $sort => $order) {
 		
-			$sort = $this->_sanitizeColumn($sort);
+			$sort = $this->_validSortColumn($sort);
 			
 			if(!$sort)
 				continue;
@@ -463,18 +463,21 @@ class Yab_Helper_Pager {
 
 	}
 
-	private function _sanitizeColumn($column) {
+	private function _validSortColumn($column_name) {
 
-		if(!$column)
+		if(!$column_name)
 			return '';
 		
-		if(!preg_match('#^\s*SELECT(\s+.+\s+)FROM#is', $this->_statement->getPackedSql(), $match))
-			return '';
+		if(preg_match('#^\s*SELECT(\s+.+\s+)FROM#is', $this->_statement->getPackedSql(), $match))
+			if(preg_match('#([a-z0-9\._]*'.preg_quote($column_name, '#').')([^a-z0-9\._]|$)#uis', $match[1], $match))
+				return $match[1];
+				
+		foreach($this->_statement->getTables() as $alias => $table) 
+			foreach($table->getColumns() as $column) 
+				if($column_name == $column->getName())
+					return $this->_statement->getAdapter()->quoteIdentifier($alias).'.'.$this->_statement->getAdapter()->quoteIdentifier($column_name);
 
-		if(!preg_match('#([a-z0-9\._]*'.preg_quote($column, '#').')([^a-z0-9\._]|$)#uis', $match[1], $match))
-			return '';
-
-		return $match[1];
+		return '';
 	
 	}
 
