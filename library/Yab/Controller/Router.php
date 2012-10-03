@@ -17,7 +17,7 @@ class Yab_Controller_Router {
 	private $_default_controller = 'Index';
 	private $_error_controller = 'Error';
 	private $_default_action = 'index';
-
+	
 	final public function setDefaultController($default_controller) {
 
 		$this->_default_controller = $default_controller;
@@ -104,16 +104,15 @@ class Yab_Controller_Router {
 
 		}
 
-		if(!$request->isRouted()) 
-			$this->_route($request, $request->getUri().'=');
-	
+		if(!$request->isRouted())
+			$this->_route($request, $request->getUri().'=', true);
+
 		return $this;
 
 	}
 	
-	final private function _route(Yab_Controller_Request $request, $route) {
+	final private function _route(Yab_Controller_Request $request, $route, $last_route = false) {
 
-	
 		$equal = strrpos($route, '=');
 		
 		if(!is_numeric($equal))
@@ -125,6 +124,8 @@ class Yab_Controller_Router {
 		$external_regexp = '#^'.str_replace('\*', '([a-zA-Z0-9_-]*)',  preg_quote($external, '#')).'#';
 
 		if($internal) {
+
+			# We have an internal
 		
 			$first_comma = strpos($internal, '.');
 			
@@ -152,6 +153,8 @@ class Yab_Controller_Router {
 
 			if($request->getUri()) {
 
+				# We have an internal and request has an url
+
 				if(!preg_match($external_regexp, $request->getUri(), $matches))
 					return false;
 
@@ -167,6 +170,8 @@ class Yab_Controller_Router {
 				return true;
 
 			}
+
+			# We have an internal but request has no url
 			
 			if($request->getController() != $internal_controller || $request->getAction() != $internal_action || count($request->getParams()) != count($internal_params))
 				return false;
@@ -205,12 +210,12 @@ class Yab_Controller_Router {
 			}
 
 			$request->setUri($request->getBaseUrl().$external);
-
+			
 			return true;
-		
-		}
 
-		if($request->getUri()) {
+		} elseif($request->getUri()) {
+		
+			# We have no internal, but request has an url
 
 			if(!preg_match($external_regexp, $request->getUri(), $matches))
 				return false;
@@ -225,14 +230,20 @@ class Yab_Controller_Router {
 			$request->setParams($parts);
 			
 			$this->_checkRequest($request);
-
+			
 			return true;
-	
-		}
 
-		$request->setUri($request->getBaseUrl().'/'.$request->getController().'/'.$request->getAction().'/'.implode('/', $request->getParams()));
+		} elseif($last_route) { 
 		
-		return true;
+			# We have no internal, and request has no url and it is the last route to route request 
+			
+			$request->setUri($request->getBaseUrl().'/'.$request->getController().'/'.$request->getAction().'/'.implode('/', $request->getParams()));
+		
+			return true;
+		
+		}
+		
+		return false;
 
 	}
 	
@@ -244,7 +255,7 @@ class Yab_Controller_Router {
 			$method = $request->getActionMethod();
 
 			if(!class_exists($class) || !method_exists($class, $method))
-				throw new Yab_Exception('no route');
+				throw new Yab_Exception('Request does not route to a valid Controller->action, redirecting on the error controller');
 
 		} catch(Yab_Exception $e) {
 		
