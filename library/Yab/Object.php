@@ -164,7 +164,7 @@ class Yab_Object implements ArrayAccess, Iterator, Countable {
 		if(!is_string($old_value) || !is_string($value))
 			throw new Yab_Exception('can not prepend the value to "'.$key.'" strings are needed');
 
-		return $this->set($key, $old_value.$value);
+		return $this->set($key, $value.$old_value);
 
 	}
 
