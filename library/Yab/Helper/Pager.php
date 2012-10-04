@@ -23,26 +23,27 @@ class Yab_Helper_Pager {
 	private $_request = null;
 	private $_request_params = 0;
 	
-	private $_multi_sort = false;
+	private $_multi_sort = true;
 
 	private $_first_page = 1;
 
 	private $_current_page = null;
 	private $_last_page = null;
 	private $_per_page = null;
+	private $_default_per_page = 25;
+	private $_max_per_page = null;
 
 	private $_order_by = array();
 	
 	private $_total = null;
 	
-	public function __construct(Yab_Db_Statement $statement, $prefix = null, $request_params = 0, $multi_sort = true) {
+	public function __construct(Yab_Db_Statement $statement, $prefix = null, $request_params = 0) {
 
 		$this->_statement = $statement;
 		
 		$this->_prefix = (string) $prefix;
 		$this->_request_params = (int) $request_params;	
-		$this->_multi_sort = (bool) $multi_sort;
-		
+
 		$this->_request = Yab_Loader::getInstance()->getRequest();
 
 		if($this->_prefix) {
@@ -67,6 +68,31 @@ class Yab_Helper_Pager {
 		
 	}
 	
+	public function setDefaultPerPage($per_page) {
+		
+		$this->_default_per_page = (int) $per_page;
+
+		return $this;
+
+	}
+
+	public function setMaxPerPage($max_per_page) {
+		
+		$this->_max_per_page = (int) $max_per_page;
+
+		return $this;
+
+	}
+	
+	public function setMultiSort($multi_sort) {
+		
+		$this->_multi_sort = (bool) $multi_sort;
+
+		return $this;
+
+	}
+
+
 	public function getFilteredStatement() {
 	
 		$adapter = $this->_statement->getAdapter();
@@ -306,10 +332,13 @@ class Yab_Helper_Pager {
 		$this->_per_page = $this->_getRequestParam(1);
 
 		if(!$this->_per_page)
-			$this->_per_page = 25;
+			$this->_per_page = $this->_default_per_page;
 
 		$this->_per_page = max(1, intval($this->_per_page));
 
+		if($this->_max_per_page)
+			$this->_per_page = min($this->_max_per_page, $this->_per_page);
+		
 		return $this->_per_page;
 
 	}
