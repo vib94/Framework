@@ -361,7 +361,8 @@ class Yab_Loader {
 					
 					if($property->isPrivate()) {
 					
-						$property->setAccessible(true);
+						if(PHP_VERSION >= '5.3')
+							$property->setAccessible(true);
 						
 						$access = 'private';
 					
@@ -369,14 +370,16 @@ class Yab_Loader {
 					
 					if($property->isProtected()) {
 					
-						$property->setAccessible(true);
+						if(PHP_VERSION >= '5.3')
+							$property->setAccessible(true);
 						
 						$access = 'protected';
 					
 					}
-
-					$dump .= PHP_EOL.str_repeat("\t", $depth + 1).'<span style="'.$dump_accessibility.'">'.$access.($property->isStatic() ? ' static' : '').'</span> <span style="'.$dump_value_attribute.'">'.$property->getName().'</span> <span style="'.$dump_operator.'">=&gt;</span> '.$this->dump($property->getValue($var), $depth + 1, $recursion);
 					
+					if(PHP_VERSION >= '5.3')
+						$dump .= PHP_EOL.str_repeat("\t", $depth + 1).'<span style="'.$dump_accessibility.'">'.$access.($property->isStatic() ? ' static' : '').'</span> <span style="'.$dump_value_attribute.'">'.$property->getName().'</span> <span style="'.$dump_operator.'">=&gt;</span> '.$this->dump($property->getValue($var), $depth + 1, $recursion);
+
 				}
 	
 			break;
