@@ -228,14 +228,14 @@ class Yab_Form_Element extends Yab_Object {
 				if($this->has('fake_options')) {
 
 					foreach($this->get('fake_options') as $key => $value)
-						$render .= '<span><label for="'.$id.$filter->filter($key).'">'.$filter->filter($value).'</label><input type="'.$type.'" id="'.$id.$filter->filter($key).'" value="'.$filter->filter($key).'"'.$this->getAttributesHtml().(($this->isMultiple() && is_array($this->get('value')) && in_array($key, $this->get('value'))) || (!$this->isMultiple() && $key == $this->get('value')) ? ' checked="checked"' : '').' /></span>';
+						$render .= '<span><label for="'.$id.$filter->filter($key).'">'.$filter->filter($value).'</label><input type="'.$type.'" id="'.$id.$filter->filter($key).'" value="'.$filter->filter($key).'"'.$this->getAttributesHtml().(($this->isMultiple() && is_array($this->get('value')) && in_array((string) $key, $this->get('value'))) || (!$this->isMultiple() && (string) $key == $this->get('value')) ? ' checked="checked"' : '').' /></span>';
 
 				}
 
 				if($this->has('options')) {
 
 					foreach($this->get('options') as $key => $value)
-						$render .= '<span><label for="'.$id.$filter->filter($key).'">'.$filter->filter($value).'</label><input type="'.$type.'" id="'.$id.$filter->filter($key).'" value="'.$filter->filter($key).'"'.$this->getAttributesHtml().(($this->isMultiple() && is_array($this->get('value')) && in_array($key, $this->get('value'))) || (!$this->isMultiple() && $key == $this->get('value')) ? ' checked="checked"' : '').' /></span>';
+						$render .= '<span><label for="'.$id.$filter->filter($key).'">'.$filter->filter($value).'</label><input type="'.$type.'" id="'.$id.$filter->filter($key).'" value="'.$filter->filter($key).'"'.$this->getAttributesHtml().(($this->isMultiple() && is_array($this->get('value')) && in_array((string) $key, $this->get('value'))) || (!$this->isMultiple() && (string) $key == $this->get('value')) ? ' checked="checked"' : '').' /></span>';
 
 				}
 
@@ -307,7 +307,7 @@ class Yab_Form_Element extends Yab_Object {
 
 			} else {
 
-				$render_options .= '<option value="'.$filter->filter($key).'"'.(($this->isMultiple() && in_array($key, $this->get('value'))) || (!$this->isMultiple() && $key == $this->get('value')) ? ' selected="selected"' : '').'>'.$filter->filter($value).'</option>';
+				$render_options .= '<option value="'.$filter->filter($key).'"'.(($this->isMultiple() && in_array((string) $key, $this->get('value'))) || (!$this->isMultiple() && (string) $key == $this->get('value')) ? ' selected="selected"' : '').'>'.$filter->filter($value).'</option>';
 
 			}
 
