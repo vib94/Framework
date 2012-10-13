@@ -284,7 +284,7 @@ class Yab_Loader {
 
 	final public function dump($var, $depth = 0, SplObjectStorage $recursion = null) {
 
-		if($this->getRequest()->isCli())
+		if($this->getRequest()->isCli() || PHP_VERSION < '5.3')
 			return print_r($var, true);
 
 		$dump_type = 'color: #007700';
