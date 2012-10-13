@@ -154,6 +154,12 @@ class Yab_Form_Element extends Yab_Object {
 		return $this->get('value', $filters && $this->has('filters') ? $this->get('filters') : null);
 
 	}
+
+	final public function getForm() {
+
+		return $this->_form;
+
+	}
 	
 	final public function addClass($class) {
 
