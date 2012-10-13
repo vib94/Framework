@@ -187,13 +187,14 @@ class Yab_Helper_Pager {
 
 	}
 	
-	public function getFormFilters(array $table_aliases) {
-	
-		$form = new Yab_Form();
-		
-		$form->set('method', 'get');
+	public function getFilters(array $table_aliases) {
+
+		$form = null;
 		
 		foreach($table_aliases as $table_alias => $columns) {
+		
+			if(!is_array($columns))
+				$columns = array($columns);
 		
 			foreach($columns as $column_key => $column_value) {
 			
@@ -204,30 +205,53 @@ class Yab_Helper_Pager {
 				
 				}
 				
-				$filter_name = $this->getFilterName($table_alias, $column_key);
+				$element = $this->getFilter($table_alias, $column_key, $column_value, $form);
 				
-				$attributes = array(
-					'id' => $filter_name,
-					'name' => $filter_name,
-					'type' => 'text',
-					'value' => $this->_session->has($filter_name) ? $this->_session->get($filter_name) : null,
-				);
-				
-				if($column_value) {
-				
-					$attributes['type'] = 'select';
-					$attributes['options'] = $this->getFilterStatement($table_alias, $column_key, $column_value);
-					
-				}
-				
-				$form->setElement($filter_name, $attributes);
-			
-		
+				$form = $element->getForm();
+
 			}
 		
 		}
 
 		return $form;
+
+	}
+	
+	public function getFilter($table_alias, $column_key, $column_value = null, Yab_Form $form = null) {
+	
+		if($form === null) {
+	
+			$form = new Yab_Form();
+			
+			$form->set('method', 'get');
+			
+			$form->set('action', '');
+		
+		}
+
+		$filter_name = $this->getFilterName($table_alias, $column_key);
+		
+		$attributes = array(
+			'id' => $filter_name,
+			'name' => $filter_name,
+			'type' => 'text',
+			'value' => $this->_session->has($filter_name) ? $this->_session->get($filter_name) : null,
+		);
+		
+		if($column_value) {
+		
+			$attributes['type'] = 'select';
+			$attributes['options'] = $this->getFilterStatement($table_alias, $column_key, $column_value);
+			
+		}
+				
+		$form->setElement($filter_name, $attributes);
+
+		$element = $form->getElement($filter_name);
+		
+		$element->set('value', $this->_session->has($filter_name) ? $this->_session->get($filter_name) : null);
+		
+		return $element;
 
 	}
 
