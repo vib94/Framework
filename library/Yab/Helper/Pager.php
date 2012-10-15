@@ -653,7 +653,10 @@ class Yab_Helper_Pager {
 		if(preg_match('#^\s*SELECT(\s+.+\s+)FROM#is', $this->_statement->getPackedSql(), $match))
 			if(preg_match('#([a-z0-9\._]*'.preg_quote($column_name, '#').')([^a-z0-9\._]|$)#uis', $match[1], $match))
 				return $match[1];
-				
+
+		if(is_numeric(strpos($column_name, '.')))
+			$column_name = substr($column_name, strpos($column_name, '.') + 1, strlen($column_name) - strpos($column_name, '.'));
+
 		foreach($this->_statement->getTables() as $alias => $table) 
 			foreach($table->getColumns() as $column) 
 				if($column_name == $column->getName())
