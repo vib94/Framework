@@ -326,9 +326,9 @@ class Yab_Form_Element extends Yab_Object {
 	protected function _isSelected($value) {
 	
 		if($this->isMultiple()) 
-			return in_array($value, $this->get('value', 'Array'), true);
+			return in_array($value, $this->get('value', 'Array'));
 			
-		return $value === $this->get('value');
+		return (string )$value === (string) $this->get('value');
 
 	}
 
