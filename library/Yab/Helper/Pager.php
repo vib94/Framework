@@ -12,8 +12,6 @@
 
 class Yab_Helper_Pager {
 
-	const CLEAR_URL_TAG = 'clear';
-
 	private $_statement = null;
 	
 	private $_prefix = null;
@@ -37,6 +35,11 @@ class Yab_Helper_Pager {
 	
 	private $_total = null;
 	
+	private $_clear_url_tag = 'clear';
+	private $_export_url_tag = 'export';
+	private $_filter_prefix = 'filter_';
+	private $_filter_separator = '~';
+
 	public function __construct(Yab_Db_Statement $statement, $prefix = null, $request_params = 0) {
 
 		$this->_statement = $statement;
@@ -50,10 +53,10 @@ class Yab_Helper_Pager {
 		
 			$session = Yab_Loader::getInstance()->getSession();
 
-			if(!$session->has('pager_'.$this->_prefix))
-				$session->set('pager_'.$this->_prefix, array());
+			if(!$session->has($this->_prefix))
+				$session->set($this->_prefix, array());
 
-			$this->_session = $session->cast('pager_'.$this->_prefix);
+			$this->_session = $session->cast($this->_prefix);
 		
 		} else {
 		
@@ -61,35 +64,11 @@ class Yab_Helper_Pager {
 		
 		}
 		
-		if($this->_request->getParam($this->_request_params) == self::CLEAR_URL_TAG)
+		if($this->_request->getParam($this->_request_params) == $this->_clear_url_tag)
 			$this->_session->clear();
 		
 		$this->_order_by = $this->_statement->getOrderBy();
 		
-	}
-	
-	public function setDefaultPerPage($per_page) {
-		
-		$this->_default_per_page = (int) $per_page;
-
-		return $this;
-
-	}
-
-	public function setMaxPerPage($max_per_page) {
-		
-		$this->_max_per_page = (int) $max_per_page;
-
-		return $this;
-
-	}
-	
-	public function setMultiSort($multi_sort) {
-		
-		$this->_multi_sort = (bool) $multi_sort;
-
-		return $this;
-
 	}
 
 	public function getFilteredStatement() {
@@ -102,18 +81,20 @@ class Yab_Helper_Pager {
 		
 		$tables = $statement->getTables();
 
+		$filter_regexp = '#^'.preg_quote($this->_filter_prefix, '#').'([^'.preg_quote($this->_filter_separator, '#').']+)'.preg_quote($this->_filter_separator, '#').'([^'.preg_quote($this->_filter_separator, '#').']+)$#i';
+		
 		foreach($this->_request->getRequest() as $key => $value) {
 		
-			if(!preg_match('#^filter_([^~]+)~([^:]+)$#i', $key, $match))
+			if(!preg_match($filter_regexp, $key, $match))
 				continue;
-				
+			
 			$this->_session->set($match[0], $value);
 		
 		}
 
 		foreach($this->_session as $key => $value) {
 		
-			if(!preg_match('#^filter_([^~]+)~([^~]+)$#i', $key, $match))
+			if(!preg_match($filter_regexp, $key, $match))
 				continue;
 			
 			$table_alias = $match[1];
@@ -158,12 +139,53 @@ class Yab_Helper_Pager {
 		if(count($order_by))
 			$statement->orderBy($order_by);
 
+		$this->export();
+			
 		if($sql_limit)
 			return $statement->sqlLimit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
 
 		$this->_total = count($statement->query());
 	
 		return $statement->limit(($this->getCurrentPage() - 1) * $this->getPerPage(), $this->getPerPage());		
+
+	}
+	
+	public function export() {
+
+		if(!$this->_request->getGet()->has($this->_export_url_tag))
+			return $this;
+			
+		$statement = $this->getFilteredStatement();
+		
+		$order_by = $this->getSqlOrderBy();
+		
+		if(count($order_by))
+			$statement->orderBy($order_by);
+		
+		$file_name = $this->_prefix ? $this->_prefix : $this->_export_url_tag;
+		$file_name .= '_'.date('Y-m-d-H-i-s');
+		
+		if($this->_request->getGet()->get($this->_export_url_tag) == 'csv') {
+
+			$csv = new Yab_File_Csv($file_name.'.csv');
+
+			$csv->setDatas($statement);
+
+			Yab_Loader::getInstance()->getResponse()->download($csv);
+
+		}
+		
+		if($this->_request->getGet()->get($this->_export_url_tag) == 'xml') {
+
+			$xml = new Yab_File_Xml($file_name.'.xml');
+
+			$xml->setDatas($statement);
+
+			Yab_Loader::getInstance()->getResponse()->download($xml);
+
+		}
+		
+		return $this;
 
 	}
 	
@@ -183,7 +205,7 @@ class Yab_Helper_Pager {
 	
 	public function getFilterName($table_alias, $column_key) {
 	
-		return 'filter_'.$table_alias.'~'.$column_key;
+		return $this->_filter_prefix.$table_alias.$this->_filter_separator.$column_key;
 
 	}
 	
@@ -223,9 +245,7 @@ class Yab_Helper_Pager {
 	
 			$form = new Yab_Form();
 			
-			$form->set('method', 'get');
-			
-			$form->set('action', '');
+			$form->set('method', 'get')->set('action', '');
 		
 		}
 
@@ -324,7 +344,7 @@ class Yab_Helper_Pager {
 		
 		if($clear_url) {
 		
-			array_push($params, self::CLEAR_URL_TAG);
+			array_push($params, $this->_clear_url_tag);
 		
 		} else {
 		
@@ -545,6 +565,62 @@ class Yab_Helper_Pager {
 		}
 		
 		return $sanitize_order_by;
+
+	}
+
+	public function setFilterPrefix($prefix) {
+	
+		$this->_filter_prefix = (string) $prefix;
+		
+		return $this;
+	
+	}
+
+	public function setFilterSeparator($separator) {
+	
+		$this->_filter_separator = (string) $separator;
+		
+		return $this;
+	
+	}
+
+	public function setClearUrlTag($tag) {
+	
+		$this->_clear_url_tag = (string) $tag;
+		
+		return $this;
+	
+	}
+
+	public function setExportUrlTag($tag) {
+	
+		$this->_export_url_tag = (string) $tag;
+		
+		return $this;
+	
+	}
+
+	public function setDefaultPerPage($per_page) {
+		
+		$this->_default_per_page = (int) $per_page;
+
+		return $this;
+
+	}
+
+	public function setMaxPerPage($max_per_page) {
+		
+		$this->_max_per_page = (int) $max_per_page;
+
+		return $this;
+
+	}
+	
+	public function setMultiSort($multi_sort) {
+		
+		$this->_multi_sort = (bool) $multi_sort;
+
+		return $this;
 
 	}
 
