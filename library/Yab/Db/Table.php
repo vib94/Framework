@@ -288,6 +288,8 @@ class Yab_Db_Table extends Yab_Object {
 	}
 	
 	final public function getSqlCondition($values = array(), $comparator = '=', $combinator = 'AND') {
+		
+		$negative_comparators = array('!=', '<>');
 	
 		$where = array();
 		
@@ -319,12 +321,14 @@ class Yab_Db_Table extends Yab_Object {
 		
 			$condition = $this->_adapter->quoteIdentifier($key);
 			
+			$column = $this->getColumn($key);
+			
 			if(is_array($value)) {
 						
-				if($this->getColumn($key)->getQuotable())
+				if($column->getQuotable())
 					$value = implode(', ', array_map(array($this->_adapter, 'quote'), $value));
 
-				if(in_array($comparator, array('!=', '<>'))) {
+				if(in_array($comparator, $negative_comparators)) {
 				
 					$condition .= ' NOT IN ('.$value.')';
 					
@@ -337,11 +341,13 @@ class Yab_Db_Table extends Yab_Object {
 			} else {
 				
 				$condition .= ' '.$comparator.' ';
-				$condition .= $this->getColumn($key)->getQuotable() ? $this->_adapter->quote($value) : $value;
+				$condition .= $column->getQuotable() ? $this->_adapter->quote($value) : $value;
 			
 			}
 			
-			
+			if(in_array($comparator, $negative_comparators) && $column->getNull())
+				$condition .= ' OR '.$this->_adapter->quoteIdentifier($key).' IS NULL';
+	
 			array_push($where, $condition);
 			
 		}
