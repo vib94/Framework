@@ -222,8 +222,20 @@ class Yab_Mail {
 
 		$headers = '';
 
-		foreach($this->_headers as $name => $header) 
-			$headers .= $name.': '.$this->encodeHeader($header).self::CRLF;
+		foreach($this->_headers as $name => $header) {
+
+			$header_suffix = '';
+
+			if(strtolower($name) == 'from') {
+				if(preg_match('#(.*)(\<([^\<]*)\>)\s*$#is', $header, $match)) {
+					$header = $match[1];
+					$header_suffix = $match[2];
+				}
+			}
+
+			$headers .= $name.': '.$this->encodeHeader($header).$header_suffix.self::CRLF;				
+
+		}
 
 		if($this->isMultipart()) {
 
